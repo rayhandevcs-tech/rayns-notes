@@ -9,9 +9,13 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("theme");
-    if (saved === "dark") {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    if (saved === "dark" || (!saved && prefersDark)) {
       setDark(true);
       document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 
