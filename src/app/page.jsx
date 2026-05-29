@@ -59,7 +59,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
-      <Navbar />
+      <Navbar/>
 
       <div className="max-w-3xl mx-auto px-4 py-12">
 
