@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Navbar from "../components/Navbar";
-import Link from "next/link";
 
 export default function NotePage() {
   const { slug } = useParams();
@@ -50,9 +49,9 @@ export default function NotePage() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Note not found
           </h2>
-          <Link href="/" className="text-violet-500 hover:underline font-medium">
+          <a href="/" className="text-violet-500 hover:underline font-medium">
             ← Back to notes
-          </Link>
+          </a>
         </div>
       </main>
     );
@@ -64,16 +63,15 @@ export default function NotePage() {
 
       <article className="max-w-2xl mx-auto px-4 py-12">
 
-        <Link
+        <a
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-violet-500 dark:hover:text-violet-400 font-medium mb-8 transition-colors duration-200"
+          className="inline-flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-violet-400 hover:text-violet-500 dark:hover:border-violet-500 dark:hover:text-violet-400 transition-all duration-200 mb-8"
         >
           ← Back to notes
-        </Link>
+        </a>
 
-        {/* Cover Image */}
         {note.coverImage && (
-          <div className="w-full h-64 overflow-hidden rounded-2xl mb-8">
+          <div className="w-full h-64 overflow-hidden rounded-2xl mb-8 mt-6">
             <img
               src={note.coverImage}
               alt={note.title}
