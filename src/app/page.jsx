@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navbar from "./components/Navbar";
 import NoteCard from "./components/NoteCard";
 import Pagination from "./components/Pagination";
 import Footer from "./components/Footer";
+
 
 const CATEGORIES = ["All", "Thoughts", "Feelings", "Reality", "Life", "Philosophy"];
 
@@ -38,12 +39,18 @@ export default function Home() {
     fetchNotes(1, "", "all");
   }, []);
 
-  const handleSearch = (e) => {
-    const val = e.target.value;
-    setSearch(val);
+  const searchTimeout = useRef(null);
+
+const handleSearch = (e) => {
+  const val = e.target.value;
+  setSearch(val);
+  
+  if (searchTimeout.current) clearTimeout(searchTimeout.current);
+  searchTimeout.current = setTimeout(() => {
     setCurrentPage(1);
     fetchNotes(1, val, category);
-  };
+  }, 500);
+};
 
   const handleCategory = (cat) => {
     const val = cat.toLowerCase();
