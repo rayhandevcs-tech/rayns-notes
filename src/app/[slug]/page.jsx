@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Navbar from "../components/Navbar";
 import Reactions from "../components/Reactions";
+import ReadingProgress from "../components/ReadingProgress";
+import RelatedNotes from "../components/RelatedNotes";
 
 export default function NotePage() {
   const { slug } = useParams();
@@ -44,6 +46,7 @@ export default function NotePage() {
   if (!note) {
     return (
       <main className="min-h-screen bg-white dark:bg-gray-950">
+        
         <Navbar />
         <div className="max-w-2xl mx-auto px-4 py-20 text-center">
           <p className="text-5xl mb-4">🌙</p>
@@ -60,6 +63,7 @@ export default function NotePage() {
 
   return (
     <main className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
+      <ReadingProgress />
       <Navbar />
 
       <article className="max-w-2xl mx-auto px-4 py-12">
@@ -116,6 +120,7 @@ export default function NotePage() {
         </div>
 
         <Reactions slug={note.slug} initialReactions={note.reactions} />
+        <RelatedNotes slug={note.slug} tags={note.tags} />
 
       </article>
     </main>
