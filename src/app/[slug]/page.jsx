@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Navbar from "../components/Navbar";
+import Reactions from "../components/Reactions";
 
 export default function NotePage() {
   const { slug } = useParams();
@@ -113,6 +114,8 @@ export default function NotePage() {
         <div className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg whitespace-pre-wrap">
           {note.content}
         </div>
+
+        <Reactions slug={note.slug} initialReactions={note.reactions} />
 
       </article>
     </main>
