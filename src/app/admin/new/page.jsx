@@ -20,6 +20,7 @@ export default function NewNote() {
     publishedAt: "",
     readingTime: "",
   });
+  const [dateInput, setDateInput] = useState("");
 
   // Auth check + load draft
   useEffect(() => {
@@ -106,26 +107,34 @@ export default function NewNote() {
     : 0;
 
   return (
+
     <main className="min-h-screen bg-white dark:bg-gray-950">
+
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-800">
+
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+
           <Link
             href="/admin/dashboard"
             className="text-sm text-gray-500 hover:text-violet-500 transition-colors"
           >
             ← Dashboard
           </Link>
+
           <h1 className="text-lg font-black text-gray-900 dark:text-white">
             New Note
           </h1>
+
           <div className="flex gap-2">
+
             <button
               onClick={handleClearDraft}
               className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-400 text-xs font-medium hover:border-red-300 hover:text-red-400 transition-colors"
             >
               Clear
             </button>
+
             <button
               onClick={() => handleSubmit("draft")}
               disabled={saving}
@@ -133,6 +142,7 @@ export default function NewNote() {
             >
               Save Draft
             </button>
+
             <button
               onClick={() => handleSubmit("published")}
               disabled={saving}
@@ -140,8 +150,11 @@ export default function NewNote() {
             >
               {saving ? "Publishing..." : "Publish"}
             </button>
+
           </div>
+
         </div>
+
 
         {/* Auto save indicator */}
         {lastSaved && (
@@ -197,14 +210,19 @@ export default function NewNote() {
         </div>
 
         <div>
+
           <div className="flex items-center justify-between mb-1">
+            
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
               Content *
             </label>
+
             <span className="text-xs text-gray-400 dark:text-gray-500">
               {wordCount} words · {form.readingTime || "0 min read"}
             </span>
+
           </div>
+
           <textarea
             name="content"
             value={form.content}
@@ -215,11 +233,15 @@ export default function NewNote() {
           />
         </div>
 
+
         <div className="grid grid-cols-2 gap-4">
+
           <div>
+
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Mood (emoji)
             </label>
+
             <input
               name="mood"
               value={form.mood}
@@ -228,10 +250,13 @@ export default function NewNote() {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors"
             />
           </div>
+
           <div>
+
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Reading Time
             </label>
+
             <input
               name="readingTime"
               value={form.readingTime}
@@ -240,6 +265,7 @@ export default function NewNote() {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors"
             />
           </div>
+
         </div>
 
         <div>
@@ -272,21 +298,28 @@ export default function NewNote() {
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
             Published Date
           </label>
+          
           <input
             type="date"
-            name="publishedAt"
-            value={form.publishedAt}
+            value={dateInput}
             onChange={(e) => {
-              const date = new Date(e.target.value);
-              const formatted = date.toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              });
-              setForm((prev) => ({ ...prev, publishedAt: formatted }));
+              const val = e.target.value;
+              setDateInput(val);
+              if (val) {
+                const date = new Date(val + "T00:00:00");
+                const formatted = date.toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                });
+                setForm((prev) => ({ ...prev, publishedAt: formatted }));
+              }
             }}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-violet-400 transition-colors"
           />
+          {form.publishedAt && (
+            <p className="text-xs text-gray-400 mt-1">{form.publishedAt}</p>
+          )}
         </div>
 
       </div>

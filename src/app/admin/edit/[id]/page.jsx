@@ -21,6 +21,7 @@ export default function EditNote() {
     publishedAt: "",
     readingTime: "",
   });
+  const [dateInput, setDateInput] = useState("");
 
   useEffect(() => {
     const auth = localStorage.getItem("admin_auth");
@@ -174,10 +175,33 @@ export default function EditNote() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Published Date</label>
-          <input name="publishedAt" value={form.publishedAt} onChange={handleChange}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-violet-400 transition-colors" />
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+            Published Date
+          </label>
+          <input
+            type="date"
+            value={dateInput}
+            onChange={(e) => {
+              const val = e.target.value;
+              setDateInput(val);
+              if (val) {
+                const date = new Date(val + "T00:00:00");
+                const formatted = date.toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                });
+                setForm((prev) => ({ ...prev, publishedAt: formatted }));
+              }
+            }}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-violet-400 transition-colors"
+          />
+          {form.publishedAt && (
+            <p className="text-xs text-gray-400 mt-1">{form.publishedAt}</p>
+          )}
         </div>
+
+
       </div>
     </main>
   );
