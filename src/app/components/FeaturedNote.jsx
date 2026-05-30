@@ -36,7 +36,7 @@ export default function FeaturedNote() {
         <div className="flex gap-4">
           {/* Cover image */}
           {note.coverImage && (
-            <div className="shrink-0 w-24 h-24 rounded-xl overflow-hidden">
+            <div className="shrink-0 w-40 h-30 rounded-xl overflow-hidden">
               <img
                 src={note.coverImage}
                 alt={note.title}

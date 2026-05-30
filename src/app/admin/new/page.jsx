@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
 
 export default function NewNote() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [preview, setPreview] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  const [dateInput, setDateInput] = useState("");
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -20,13 +23,10 @@ export default function NewNote() {
     publishedAt: "",
     readingTime: "",
   });
-  const [dateInput, setDateInput] = useState("");
 
-  // Auth check + load draft
   useEffect(() => {
     const auth = localStorage.getItem("admin_auth");
     if (!auth) router.push("/admin");
-
     const saved = localStorage.getItem("draft-new");
     if (saved) {
       const parsed = JSON.parse(saved);
@@ -35,7 +35,6 @@ export default function NewNote() {
     }
   }, []);
 
-  // Auto save
   useEffect(() => {
     if (!form.title && !form.content) return;
     const timeout = setTimeout(() => {
@@ -49,7 +48,6 @@ export default function NewNote() {
     const { name, value } = e.target;
     setForm((prev) => {
       const updated = { ...prev, [name]: value };
-
       if (name === "title") {
         updated.slug = value
           .toLowerCase()
@@ -57,13 +55,11 @@ export default function NewNote() {
           .replace(/\s+/g, "-")
           .trim();
       }
-
       if (name === "content") {
         const words = value.trim().split(/\s+/).filter(Boolean).length;
         const minutes = Math.ceil(words / 200);
         updated.readingTime = `${minutes} min read`;
       }
-
       return updated;
     });
   };
@@ -107,222 +103,165 @@ export default function NewNote() {
     : 0;
 
   return (
-
     <main className="min-h-screen bg-white dark:bg-gray-950">
 
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-800">
-
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-
-          <Link
-            href="/admin/dashboard"
-            className="text-sm text-gray-500 hover:text-violet-500 transition-colors"
-          >
-            ← Dashboard
+          <Link href="/admin/dashboard" className="text-sm text-gray-500 hover:text-violet-500 transition-colors">
+            {"<- Dashboard"}
           </Link>
-
-          <h1 className="text-lg font-black text-gray-900 dark:text-white">
-            New Note
-          </h1>
-
+          <h1 className="text-lg font-black text-gray-900 dark:text-white">New Note</h1>
           <div className="flex gap-2">
-
-            <button
-              onClick={handleClearDraft}
-              className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-400 text-xs font-medium hover:border-red-300 hover:text-red-400 transition-colors"
-            >
+            <button onClick={handleClearDraft} className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-400 text-xs font-medium hover:border-red-300 hover:text-red-400 transition-colors">
               Clear
             </button>
-
-            <button
-              onClick={() => handleSubmit("draft")}
-              disabled={saving}
-              className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-sm font-medium hover:border-violet-400 hover:text-violet-500 transition-colors disabled:opacity-50"
-            >
+            <button onClick={() => setPreview(!preview)} className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-sm font-medium hover:border-violet-400 hover:text-violet-500 transition-colors">
+              {preview ? "✏️ Edit" : "👁 Preview"}
+            </button>
+            <button onClick={() => handleSubmit("draft")} disabled={saving} className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-sm font-medium hover:border-violet-400 hover:text-violet-500 transition-colors disabled:opacity-50">
               Save Draft
             </button>
-
-            <button
-              onClick={() => handleSubmit("published")}
-              disabled={saving}
-              className="px-4 py-2 rounded-xl bg-violet-500 hover:bg-violet-600 text-white text-sm font-bold transition-colors disabled:opacity-50"
-            >
+            <button onClick={() => handleSubmit("published")} disabled={saving} className="px-4 py-2 rounded-xl bg-violet-500 hover:bg-violet-600 text-white text-sm font-bold transition-colors disabled:opacity-50">
               {saving ? "Publishing..." : "Publish"}
             </button>
-
           </div>
-
         </div>
-
-
-        {/* Auto save indicator */}
         {lastSaved && (
           <div className="max-w-3xl mx-auto px-4 pb-2">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              ✓ {lastSaved}
-            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">✓ {lastSaved}</p>
           </div>
         )}
       </div>
 
-      {/* Form */}
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-5">
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-            Title *
-          </label>
-          <input
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="What's on your mind?"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-            Slug
-          </label>
-          <input
-            name="slug"
-            value={form.slug}
-            onChange={handleChange}
-            placeholder="auto-generated-from-title"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors font-mono text-sm"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-            Excerpt *
-          </label>
-          <textarea
-            name="excerpt"
-            value={form.excerpt}
-            onChange={handleChange}
-            placeholder="A short summary..."
-            rows={2}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors resize-none"
-          />
-        </div>
-
-        <div>
-
-          <div className="flex items-center justify-between mb-1">
-            
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Content *
-            </label>
-
-            <span className="text-xs text-gray-400 dark:text-gray-500">
-              {wordCount} words · {form.readingTime || "0 min read"}
-            </span>
-
+      {/* Preview mode */}
+      {preview && (
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          <div className="mb-6 p-3 rounded-xl bg-violet-50 dark:bg-violet-950 border border-violet-200 dark:border-violet-800">
+            <p className="text-xs text-violet-600 dark:text-violet-400 font-semibold text-center">
+              Preview mode — this is how your note will look
+            </p>
           </div>
 
-          <textarea
-            name="content"
-            value={form.content}
-            onChange={handleChange}
-            placeholder="Write your thoughts here..."
-            rows={14}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors resize-none"
-          />
-        </div>
-
-
-        <div className="grid grid-cols-2 gap-4">
-
-          <div>
-
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              Mood (emoji)
-            </label>
-
-            <input
-              name="mood"
-              value={form.mood}
-              onChange={handleChange}
-              placeholder="🌙"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors"
-            />
-          </div>
-
-          <div>
-
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              Reading Time
-            </label>
-
-            <input
-              name="readingTime"
-              value={form.readingTime}
-              onChange={handleChange}
-              placeholder="2 min read"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors"
-            />
-          </div>
-
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-            Cover Image URL
-          </label>
-          <input
-            name="coverImage"
-            value={form.coverImage}
-            onChange={handleChange}
-            placeholder="https://..."
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-            Tags (comma separated)
-          </label>
-          <input
-            name="tags"
-            value={form.tags}
-            onChange={handleChange}
-            placeholder="thoughts, feelings, life"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-            Published Date
-          </label>
-          
-          <input
-            type="date"
-            value={dateInput}
-            onChange={(e) => {
-              const val = e.target.value;
-              setDateInput(val);
-              if (val) {
-                const date = new Date(val + "T00:00:00");
-                const formatted = date.toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                });
-                setForm((prev) => ({ ...prev, publishedAt: formatted }));
-              }
-            }}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-violet-400 transition-colors"
-          />
-          {form.publishedAt && (
-            <p className="text-xs text-gray-400 mt-1">{form.publishedAt}</p>
+          {form.coverImage && (
+            <div className="w-full overflow-hidden rounded-2xl mb-8">
+              <img src={form.coverImage} alt={form.title} className="w-full h-auto object-cover" />
+            </div>
           )}
-        </div>
 
-      </div>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-3xl">{form.mood || "📝"}</span>
+            <span className="text-sm text-gray-400">{form.readingTime || "1 min read"}</span>
+          </div>
+
+          <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-4 tracking-tight leading-tight">
+            {form.title || "Untitled"}
+          </h1>
+
+          {form.tags && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {form.tags.split(",").map((t) => t.trim()).filter(Boolean).map((tag) => (
+                <span key={tag} className="text-xs px-3 py-1 rounded-full bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400 font-medium">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <p className="text-sm text-gray-400 mb-8">{form.publishedAt || "Date not set"}</p>
+          <hr className="border-gray-200 dark:border-gray-800 mb-8" />
+
+          <div className="
+            [&>h1]:text-3xl [&>h1]:font-black [&>h1]:text-gray-900 [&>h1]:dark:text-white [&>h1]:mb-4 [&>h1]:mt-8
+            [&>h2]:text-2xl [&>h2]:font-black [&>h2]:text-gray-900 [&>h2]:dark:text-white [&>h2]:mb-3 [&>h2]:mt-6
+            [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-gray-900 [&>h3]:dark:text-white [&>h3]:mb-2 [&>h3]:mt-4
+            [&>p]:text-gray-700 [&>p]:dark:text-gray-300 [&>p]:leading-relaxed [&>p]:text-lg [&>p]:mb-4
+            [&>strong]:font-bold [&>strong]:text-gray-900 [&>strong]:dark:text-white
+            [&>em]:italic [&>em]:text-gray-600 [&>em]:dark:text-gray-400
+            [&>blockquote]:border-l-4 [&>blockquote]:border-violet-400 [&>blockquote]:pl-4 [&>blockquote]:py-2 [&>blockquote]:bg-violet-50 [&>blockquote]:dark:bg-violet-950/30 [&>blockquote]:rounded-r-xl [&>blockquote]:my-4
+            [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>ul]:text-gray-700 [&>ul]:dark:text-gray-300
+            [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4 [&>ol]:text-gray-700 [&>ol]:dark:text-gray-300
+            [&>hr]:border-gray-200 [&>hr]:dark:border-gray-800 [&>hr]:my-6
+          ">
+            <ReactMarkdown>{form.content || "No content yet..."}</ReactMarkdown>
+          </div>
+        </div>
+      )}
+
+      {/* Form */}
+      {!preview && (
+        <div className="max-w-3xl mx-auto px-4 py-8 space-y-5">
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Title *</label>
+            <input name="title" value={form.title} onChange={handleChange} placeholder="What's on your mind?"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Slug</label>
+            <input name="slug" value={form.slug} onChange={handleChange} placeholder="auto-generated-from-title"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors font-mono text-sm" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Excerpt *</label>
+            <textarea name="excerpt" value={form.excerpt} onChange={handleChange} placeholder="A short summary..." rows={2}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors resize-none" />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Content *</label>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{wordCount} words · {form.readingTime || "0 min read"}</span>
+            </div>
+            <textarea name="content" value={form.content} onChange={handleChange} placeholder="Write your thoughts here..." rows={14}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors resize-none" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Mood (emoji)</label>
+              <input name="mood" value={form.mood} onChange={handleChange} placeholder="🌙"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Reading Time</label>
+              <input name="readingTime" value={form.readingTime} onChange={handleChange} placeholder="2 min read"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Cover Image URL</label>
+            <input name="coverImage" value={form.coverImage} onChange={handleChange} placeholder="https://..."
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Tags (comma separated)</label>
+            <input name="tags" value={form.tags} onChange={handleChange} placeholder="thoughts, feelings, life"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Published Date</label>
+            <input type="date" value={dateInput}
+              onChange={(e) => {
+                const val = e.target.value;
+                setDateInput(val);
+                if (val) {
+                  const date = new Date(val + "T00:00:00");
+                  const formatted = date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+                  setForm((prev) => ({ ...prev, publishedAt: formatted }));
+                }
+              }}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-violet-400 transition-colors" />
+            {form.publishedAt && <p className="text-xs text-gray-400 mt-1">{form.publishedAt}</p>}
+          </div>
+
+        </div>
+      )}
     </main>
   );
 }
