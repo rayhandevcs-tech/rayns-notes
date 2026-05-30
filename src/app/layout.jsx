@@ -1,7 +1,7 @@
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
-
+import BackToTop from "./components/BackToTop";
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata = {
@@ -29,6 +29,7 @@ export default function RootLayout({ children }) {
       <body className={`${geist.className} bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300`}>
         <ThemeProvider>
           {children}
+           <BackToTop />
         </ThemeProvider>
       </body>
     </html>

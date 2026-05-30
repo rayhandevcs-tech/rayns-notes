@@ -41,7 +41,7 @@ export default function Reactions({ slug, initialReactions }) {
   };
 
   return (
-    <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
+    <div className="mt-12 pt-8">
       <p className="text-sm font-semibold text-gray-400 dark:text-gray-500 text-center mb-4 uppercase tracking-widest">
         Did this resonate?
       </p>

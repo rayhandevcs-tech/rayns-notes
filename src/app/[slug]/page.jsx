@@ -6,6 +6,23 @@ import Navbar from "../components/Navbar";
 import Reactions from "../components/Reactions";
 import ReadingProgress from "../components/ReadingProgress";
 import RelatedNotes from "../components/RelatedNotes";
+import ShareButton from "../components/ShareButton";
+import SignOff from "../components/SignOff";
+
+const getMoodTint = (mood) => {
+  if (!mood) return "";
+  if (mood.includes("🌙") || mood.includes("🌑") || mood.includes("💙"))
+    return "bg-blue-50 dark:bg-blue-950/20";
+  if (mood.includes("☀️") || mood.includes("🌞") || mood.includes("✨"))
+    return "bg-amber-50 dark:bg-amber-950/20";
+  if (mood.includes("🌫️") || mood.includes("😶") || mood.includes("🌧️"))
+    return "bg-gray-50 dark:bg-gray-900";
+  if (mood.includes("❤️") || mood.includes("🥰") || mood.includes("💕"))
+    return "bg-rose-50 dark:bg-rose-950/20";
+  if (mood.includes("🌿") || mood.includes("🍃") || mood.includes("🌱"))
+    return "bg-green-50 dark:bg-green-950/20";
+  return "";
+};
 
 export default function NotePage() {
   const { slug } = useParams();
@@ -46,7 +63,6 @@ export default function NotePage() {
   if (!note) {
     return (
       <main className="min-h-screen bg-white dark:bg-gray-950">
-        
         <Navbar />
         <div className="max-w-2xl mx-auto px-4 py-20 text-center">
           <p className="text-5xl mb-4">🌙</p>
@@ -62,7 +78,7 @@ export default function NotePage() {
   }
 
   return (
-    <main className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
+    <main className={`min-h-screen transition-colors duration-300 ${getMoodTint(note.mood)} bg-white dark:bg-gray-950`}>
       <ReadingProgress />
       <Navbar />
 
@@ -109,16 +125,18 @@ export default function NotePage() {
           </div>
         )}
 
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-8">
-          {note.publishedAt}
-        </p>
-
-        <hr className="border-gray-200 dark:border-gray-800 mb-8" />
+        <div className="flex items-center justify-between mb-8">
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            {note.publishedAt}
+          </p>
+          <ShareButton />
+        </div>
 
         <div className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg whitespace-pre-wrap">
           {note.content}
         </div>
 
+        <SignOff />
         <Reactions slug={note.slug} initialReactions={note.reactions} />
         <RelatedNotes slug={note.slug} tags={note.tags} />
 

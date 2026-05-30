@@ -47,7 +47,17 @@ export default function EditNote() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      const updated = { ...prev, [name]: value };
+
+      if (name === "content") {
+        const words = value.trim().split(/\s+/).length;
+        const minutes = Math.ceil(words / 200);
+        updated.readingTime = `${minutes} min read`;
+      }
+
+      return updated;
+    });
   };
 
   const handleSubmit = async (status) => {

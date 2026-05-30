@@ -29,14 +29,13 @@ export default function NewNote() {
     const { name, value } = e.target;
     setForm((prev) => {
       const updated = { ...prev, [name]: value };
-      // Auto generate slug from title
-      if (name === "title") {
-        updated.slug = value
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, "")
-          .replace(/\s+/g, "-")
-          .trim();
+
+      if (name === "content") {
+        const words = value.trim().split(/\s+/).length;
+        const minutes = Math.ceil(words / 200);
+        updated.readingTime = `${minutes} min read`;
       }
+
       return updated;
     });
   };
