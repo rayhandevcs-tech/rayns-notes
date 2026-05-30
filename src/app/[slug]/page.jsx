@@ -129,7 +129,7 @@ export default function NotePage() {
           <p className="text-sm text-gray-400 dark:text-gray-500">
             {note.publishedAt}
           </p>
-          <ShareButton />
+          <ShareButton title={note.title} />
         </div>
 
         <div className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg whitespace-pre-wrap">

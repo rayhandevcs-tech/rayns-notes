@@ -7,6 +7,7 @@ import Link from "next/link";
 export default function NewNote() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -20,18 +21,44 @@ export default function NewNote() {
     readingTime: "",
   });
 
+  // Auth check + load draft
   useEffect(() => {
     const auth = localStorage.getItem("admin_auth");
     if (!auth) router.push("/admin");
+
+    const saved = localStorage.getItem("draft-new");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setForm(parsed);
+      setLastSaved("Restored from draft");
+    }
   }, []);
+
+  // Auto save
+  useEffect(() => {
+    if (!form.title && !form.content) return;
+    const timeout = setTimeout(() => {
+      localStorage.setItem("draft-new", JSON.stringify(form));
+      setLastSaved("Auto saved " + new Date().toLocaleTimeString());
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [form]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => {
       const updated = { ...prev, [name]: value };
 
+      if (name === "title") {
+        updated.slug = value
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .trim();
+      }
+
       if (name === "content") {
-        const words = value.trim().split(/\s+/).length;
+        const words = value.trim().split(/\s+/).filter(Boolean).length;
         const minutes = Math.ceil(words / 200);
         updated.readingTime = `${minutes} min read`;
       }
@@ -53,13 +80,30 @@ export default function NewNote() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (res.ok) router.push("/admin/dashboard");
+      if (res.ok) {
+        localStorage.removeItem("draft-new");
+        router.push("/admin/dashboard");
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setSaving(false);
     }
   };
+
+  const handleClearDraft = () => {
+    localStorage.removeItem("draft-new");
+    setForm({
+      title: "", slug: "", excerpt: "", content: "",
+      mood: "", coverImage: "", tags: "", status: "draft",
+      publishedAt: "", readingTime: "",
+    });
+    setLastSaved(null);
+  };
+
+  const wordCount = form.content.trim()
+    ? form.content.trim().split(/\s+/).filter(Boolean).length
+    : 0;
 
   return (
     <main className="min-h-screen bg-white dark:bg-gray-950">
@@ -77,6 +121,12 @@ export default function NewNote() {
           </h1>
           <div className="flex gap-2">
             <button
+              onClick={handleClearDraft}
+              className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-400 text-xs font-medium hover:border-red-300 hover:text-red-400 transition-colors"
+            >
+              Clear
+            </button>
+            <button
               onClick={() => handleSubmit("draft")}
               disabled={saving}
               className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-sm font-medium hover:border-violet-400 hover:text-violet-500 transition-colors disabled:opacity-50"
@@ -92,12 +142,20 @@ export default function NewNote() {
             </button>
           </div>
         </div>
+
+        {/* Auto save indicator */}
+        {lastSaved && (
+          <div className="max-w-3xl mx-auto px-4 pb-2">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              ✓ {lastSaved}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Form */}
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-5">
 
-        {/* Title */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
             Title *
@@ -111,7 +169,6 @@ export default function NewNote() {
           />
         </div>
 
-        {/* Slug */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
             Slug
@@ -125,7 +182,6 @@ export default function NewNote() {
           />
         </div>
 
-        {/* Excerpt */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
             Excerpt *
@@ -140,22 +196,25 @@ export default function NewNote() {
           />
         </div>
 
-        {/* Content */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-            Content *
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Content *
+            </label>
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              {wordCount} words · {form.readingTime || "0 min read"}
+            </span>
+          </div>
           <textarea
             name="content"
             value={form.content}
             onChange={handleChange}
             placeholder="Write your thoughts here..."
-            rows={12}
+            rows={14}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors resize-none"
           />
         </div>
 
-        {/* Row: Mood + Reading time */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
@@ -183,7 +242,6 @@ export default function NewNote() {
           </div>
         </div>
 
-        {/* Cover Image */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
             Cover Image URL
@@ -197,7 +255,6 @@ export default function NewNote() {
           />
         </div>
 
-        {/* Tags */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
             Tags (comma separated)
@@ -211,17 +268,24 @@ export default function NewNote() {
           />
         </div>
 
-        {/* Published At */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
             Published Date
           </label>
           <input
+            type="date"
             name="publishedAt"
             value={form.publishedAt}
-            onChange={handleChange}
-            placeholder="May 29, 2026"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-colors"
+            onChange={(e) => {
+              const date = new Date(e.target.value);
+              const formatted = date.toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              });
+              setForm((prev) => ({ ...prev, publishedAt: formatted }));
+            }}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-violet-400 transition-colors"
           />
         </div>
 
