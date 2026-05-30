@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import NoteCard from "./components/NoteCard";
 import Pagination from "./components/Pagination";
 import Footer from "./components/Footer";
+import FeaturedNote from "./components/FeaturedNote";
 
 
 const CATEGORIES = ["All", "Thoughts", "Feelings", "Reality", "Life", "Philosophy"];
@@ -91,10 +92,13 @@ export default function Home() {
           </h1>
 
           <p className="text-gray-500 dark:text-gray-400 text-lg">
-            Thoughts, feelings, reality — written honestly.
+            Thoughts, feelings, reality — <i>words of affirmation</i>
           </p>
 
         </div>
+
+        {/* Featured note */}
+          <FeaturedNote />
 
         {/* Search bar */}
         <div className="relative mb-4">

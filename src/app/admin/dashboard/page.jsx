@@ -44,22 +44,45 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleFeature = async (id, currentFeatured) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/notes/${id}/feature`,
+      { method: "PUT" }
+    );
+    const data = await res.json();
+    setNotes((prev) =>
+      prev.map((n) => ({
+        ...n,
+        featured: n._id === id ? data.featured : false,
+      }))
+    );
+  } catch (err) {
+    console.error(err);
+  }
+};
+
   const handleLogout = () => {
     localStorage.removeItem("admin_auth");
     router.push("/admin");
   };
 
   return (
+
     <main className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
+
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-800">
+
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+
           <div>
             <h1 className="text-xl font-black text-gray-900 dark:text-white">
               Admin Dashboard
             </h1>
             <p className="text-xs text-gray-400">Rayn's Notes</p>
           </div>
+
           <div className="flex items-center gap-3">
             <Link
               href="/admin/new"
@@ -118,6 +141,18 @@ export default function AdminDashboard() {
                   }`}>
                     {note.status}
                   </span>
+
+                  <button
+                    onClick={() => handleFeature(note._id, note.featured)}
+                    className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                      note.featured
+                        ? "border-yellow-400 text-yellow-500 bg-yellow-50 dark:bg-yellow-950"
+                        : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-yellow-400 hover:text-yellow-500"
+                    }`}
+                  >
+                    {note.featured ? "⭐ Featured" : "☆ Feature"}
+                  </button>
+
                   <Link
                     href={`/admin/edit/${note._id}`}
                     className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium hover:border-violet-400 hover:text-violet-500 transition-colors"

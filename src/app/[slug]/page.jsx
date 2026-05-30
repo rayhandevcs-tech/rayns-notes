@@ -92,11 +92,11 @@ export default function NotePage() {
         </a>
 
         {note.coverImage && (
-          <div className="w-full h-64 overflow-hidden rounded-2xl mb-8 mt-6">
+          <div className="w-full overflow-hidden rounded-2xl mb-8 mt-6">
             <img
               src={note.coverImage}
               alt={note.title}
-              className="w-full h-full object-cover"
+              className="w-full h-auto object-cover"
             />
           </div>
         )}
