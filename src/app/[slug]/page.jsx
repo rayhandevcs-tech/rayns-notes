@@ -8,6 +8,7 @@ import ReadingProgress from "../components/ReadingProgress";
 import RelatedNotes from "../components/RelatedNotes";
 import ShareButton from "../components/ShareButton";
 import SignOff from "../components/SignOff";
+import ReactMarkdown from "react-markdown";
 
 const getMoodTint = (mood) => {
   if (!mood) return "";
@@ -132,8 +133,21 @@ export default function NotePage() {
           <ShareButton title={note.title} />
         </div>
 
-        <div className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg whitespace-pre-wrap">
-          {note.content}
+        <div className="
+          [&>h1]:text-3xl [&>h1]:font-black [&>h1]:text-gray-900 [&>h1]:dark:text-white [&>h1]:mb-4 [&>h1]:mt-8
+          [&>h2]:text-2xl [&>h2]:font-black [&>h2]:text-gray-900 [&>h2]:dark:text-white [&>h2]:mb-3 [&>h2]:mt-6
+          [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-gray-900 [&>h3]:dark:text-white [&>h3]:mb-2 [&>h3]:mt-4
+          [&>p]:text-gray-700 [&>p]:dark:text-gray-300 [&>p]:leading-relaxed [&>p]:text-lg [&>p]:mb-4
+          [&>strong]:font-bold [&>strong]:text-gray-900 [&>strong]:dark:text-white
+          [&>em]:italic [&>em]:text-gray-600 [&>em]:dark:text-gray-400
+          [&>blockquote]:border-l-4 [&>blockquote]:border-violet-400 [&>blockquote]:pl-4 [&>blockquote]:py-2 [&>blockquote]:bg-violet-50 [&>blockquote]:dark:bg-violet-950/30 [&>blockquote]:rounded-r-xl [&>blockquote]:my-4
+          [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>ul]:text-gray-700 [&>ul]:dark:text-gray-300
+          [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4 [&>ol]:text-gray-700 [&>ol]:dark:text-gray-300
+          [&>hr]:border-gray-200 [&>hr]:dark:border-gray-800 [&>hr]:my-6
+        ">
+          <ReactMarkdown>
+            {note.content}
+          </ReactMarkdown>
         </div>
 
         <SignOff />
