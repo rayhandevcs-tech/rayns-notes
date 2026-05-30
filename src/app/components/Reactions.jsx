@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const REACTIONS = [
   { type: "like", emoji: "👍", label: "Like" },
@@ -11,28 +11,32 @@ const REACTIONS = [
 export default function Reactions({ slug, initialReactions }) {
   const [reactions, setReactions] = useState(initialReactions || { like: 0, love: 0, fire: 0 });
   const [reacted, setReacted] = useState({});
-  const [loading, setLoading] = useState({});
+
+  useEffect(() => {
+    const saved = localStorage.getItem(`reactions-${slug}`);
+    if (saved) setReacted(JSON.parse(saved));
+  }, [slug]);
 
   const handleReact = async (type) => {
-    if (reacted[type] || loading[type]) return;
+    const alreadyReacted = reacted[type];
 
     try {
-      setLoading((prev) => ({ ...prev, [type]: true }));
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/notes/${slug}/react`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type }),
+          body: JSON.stringify({ type, undo: alreadyReacted }),
         }
       );
       const data = await res.json();
       setReactions(data);
-      setReacted((prev) => ({ ...prev, [type]: true }));
+
+      const newReacted = { ...reacted, [type]: !alreadyReacted };
+      setReacted(newReacted);
+      localStorage.setItem(`reactions-${slug}`, JSON.stringify(newReacted));
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading((prev) => ({ ...prev, [type]: false }));
     }
   };
 
@@ -42,16 +46,15 @@ export default function Reactions({ slug, initialReactions }) {
         Did this resonate?
       </p>
       <div className="flex items-center justify-center gap-4">
-        {REACTIONS.map(({ type, emoji, label }) => (
+        {REACTIONS.map(({ type, emoji }) => (
           <button
             key={type}
             onClick={() => handleReact(type)}
-            disabled={reacted[type] || loading[type]}
             className={`flex flex-col items-center gap-1.5 px-5 py-3 rounded-2xl border transition-all duration-200 ${
               reacted[type]
                 ? "border-violet-400 bg-violet-50 dark:bg-violet-950 scale-105"
                 : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-violet-400 hover:scale-105"
-            } disabled:cursor-not-allowed`}
+            }`}
           >
             <span className="text-2xl">{emoji}</span>
             <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
