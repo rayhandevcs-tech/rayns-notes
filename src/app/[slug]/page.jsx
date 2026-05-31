@@ -25,6 +25,23 @@ const getMoodTint = (mood) => {
   return "";
 };
 
+// Markdown syntax strip করে plain text বানায়
+const stripMarkdown = (md = "") =>
+  md
+    .replace(/#{1,6}\s+/g, "")        // headings
+    .replace(/\*\*(.+?)\*\*/g, "$1")  // bold
+    .replace(/\*(.+?)\*/g, "$1")      // italic
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/_(.+?)_/g, "$1")
+    .replace(/\[(.+?)\]\(.+?\)/g, "$1") // links
+    .replace(/`{1,3}[^`]*`{1,3}/g, "") // code
+    .replace(/^>\s+/gm, "")           // blockquotes
+    .replace(/^[-*+]\s+/gm, "")       // unordered list
+    .replace(/^\d+\.\s+/gm, "")       // ordered list
+    .replace(/---/g, "")              // hr
+    .replace(/\n{2,}/g, " ")
+    .trim();
+
 export default function NotePage() {
   const { slug } = useParams();
   const [note, setNote] = useState(null);
@@ -126,7 +143,7 @@ export default function NotePage() {
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <p className="text-sm text-gray-400 dark:text-gray-500">
             {note.publishedAt}
           </p>
@@ -134,6 +151,7 @@ export default function NotePage() {
         </div>
 
         <div className="
+          mt-8
           [&>h1]:text-3xl [&>h1]:font-black [&>h1]:text-gray-900 [&>h1]:dark:text-white [&>h1]:mb-4 [&>h1]:mt-8
           [&>h2]:text-2xl [&>h2]:font-black [&>h2]:text-gray-900 [&>h2]:dark:text-white [&>h2]:mb-3 [&>h2]:mt-6
           [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-gray-900 [&>h3]:dark:text-white [&>h3]:mb-2 [&>h3]:mt-4
